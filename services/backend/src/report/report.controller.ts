@@ -10,6 +10,7 @@ import {
   Put,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
@@ -82,6 +83,8 @@ export class ReportController {
     private readonly httpService: HttpService,
   ) {}
 
+
+  @ApiOperation({ operationId: 'downloadReport' })
   @Get('report-source-documents/:id/download')
   async downloadReportSourceDocument(
     @Param('id') id: string,
@@ -105,6 +108,7 @@ export class ReportController {
     fileStream.pipe(res);
   }
 
+  @ApiOperation({ operationId: 'getReport' })
   @Get('report/:id')
   async findOne(
     @Param('id') id: string,
@@ -115,11 +119,13 @@ export class ReportController {
     });
   }
 
+  @ApiOperation({ operationId: 'getUserSettings' })
   @Get('user/:id/settings')
   async getUserSettings(@Param('id') id: string) {
     return this.entityManager.find(UserSettings);
   }
 
+  @ApiOperation({ operationId: 'setUserSettings' })
   @Put('user/:id/settings')
   async setUserSettings(
     @Param('id') id: string,
@@ -152,6 +158,7 @@ export class ReportController {
     return docs.map(({ name, content }) => ({ name, content }));
   }
 
+  @ApiOperation({ operationId: 'generateReport' })
   @Post('report/:id/generate')
   async generate(@Param('id') id: string) {
     const report = await this.reportService.getOne(+id);
@@ -206,6 +213,7 @@ export class ReportController {
     });
   }
 
+  @ApiOperation({ operationId: 'reGenerateReport' })
   @Post('report/:id/regenerate')
   async regenerate(
     @Param('id') id: string,

@@ -1,0 +1,200 @@
+openapi: 3.1.0
+info:
+  title: Report generation service
+  description: Api for generating a report on a specific topic
+  version: 0.1.0
+paths:
+  /:
+    get:
+      summary: Read Root
+      operationId: read_root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /research:
+    post:
+      summary: Research
+      description: Initially generate report
+      operationId: research
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptGeneratorResult'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /re-research:
+    post:
+      summary: Re Research
+      description: Generate modified report based on one taken from /research
+      operationId: reResearch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReResearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptGeneratorResult'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    GeneratorConfig:
+      properties:
+        dummyApi:
+          type: boolean
+          title: Dummyapi
+        llmKey:
+          type: string
+          title: Llmkey
+        tavilyApiKey:
+          type: string
+          title: Tavilyapikey
+        llmPreset:
+          type: string
+          title: Llmpreset
+      type: object
+      required:
+      - dummyApi
+      - llmKey
+      - tavilyApiKey
+      - llmPreset
+      title: GeneratorConfig
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    PromptGeneratorResult:
+      properties:
+        prompt:
+          type: string
+          title: Prompt
+        extra_sources:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Extra Sources
+      type: object
+      required:
+      - prompt
+      title: PromptGeneratorResult
+    PromptParams:
+      type: object
+    ReResearchRequest:
+      properties:
+        config:
+          $ref: '#/components/schemas/GeneratorConfig'
+        document:
+          type: string
+          title: Document
+        medatada:
+          $ref: '#/components/schemas/ResearchResultMetadataRequest'
+        prompt:
+          type: string
+          title: Prompt
+        selectionStart:
+          type: integer
+          title: Selectionstart
+        selectionLength:
+          type: integer
+          title: Selectionlength
+      type: object
+      required:
+      - config
+      - document
+      - medatada
+      - prompt
+      - selectionStart
+      - selectionLength
+      title: ReResearchRequest
+    ReportTopicEnum:
+      type: string
+      enum:
+      - CUSTOM
+      - INNOVATION_NEWS
+      - COMPETITOR_REVIEW
+      - COMPETITORS_REVIEW
+      - MARKET_ANALYSIS
+      - PRODUCT_COMPARISON
+      title: ReportTopicEnum
+    ResearchRequest:
+      properties:
+        config:
+          $ref: '#/components/schemas/GeneratorConfig'
+        reportTopic:
+          $ref: '#/components/schemas/ReportTopicEnum'
+        promptParams:
+          $ref: '#/components/schemas/PromptParams'
+        task:
+          title: Task
+      type: object
+      required:
+      - config
+      - reportTopic
+      - promptParams
+      - task
+      title: ResearchRequest
+    ResearchResultMetadataRequest:
+      properties:
+        source_urls:
+          items:
+            type: string
+          type: array
+          title: Source Urls
+      type: object
+      required:
+      - source_urls
+      title: ResearchResultMetadataRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

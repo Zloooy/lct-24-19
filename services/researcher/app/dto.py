@@ -1,4 +1,5 @@
 from typing import Any, Awaitable, Callable, Coroutine, Dict, List, Union
+from enum import Enum
 from pydantic import BaseModel
 
 
@@ -10,9 +11,17 @@ class GeneratorConfig(BaseModel):
     tavilyApiKey: str
     llmPreset: str
 
+class ReportTopicEnum(Enum):
+    CUSTOM = "CUSTOM"
+    INNOVATION_NEWS = "INNOVATION_NEWS"
+    COMPETITOR_REVIEW = "COMPETITOR_REVIEW"
+    COMPETITORS_REVIEW = "COMPETITORS_REVIEW"
+    MARKET_ANALYSIS = "MARKET_ANALYSIS"
+    PRODUCT_COMPARISON = "PRODUCT_COMPARISON"
+
 class ResearchRequest(BaseModel):
     config: GeneratorConfig
-    reportTopic: str
+    reportTopic: ReportTopicEnum
     promptParams: PromptParams
     task: Any
 
@@ -35,7 +44,7 @@ class ResearchResult:
     markdown: str
 
 
-class PromptGeneratorResult:
+class PromptGeneratorResult(BaseModel):
     prompt: str
     extra_sources: Union[List[str], None] = None
 

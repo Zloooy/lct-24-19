@@ -1,0 +1,416 @@
+openapi: 3.0.0
+paths:
+  /v1/app:
+    get:
+      operationId: AppController_getHello
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/app/config:
+    get:
+      operationId: getConfig
+      summary: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfig'
+    put:
+      operationId: setConfig
+      summary: ''
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppConfig'
+      responses:
+        '200':
+          description: ''
+  /v1/generic/load-samples:
+    post:
+      operationId: loadSamples
+      summary: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/generic/clear:
+    post:
+      operationId: clearSamples
+      summary: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/generic/{entity}:
+    get:
+      operationId: getEntities
+      summary: ''
+      parameters:
+        - name: entity
+          required: true
+          in: path
+          schema:
+            $ref: '#/components/schemas/EntityName'
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: perPage
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: sorting
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: search
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: fields
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+    post:
+      operationId: createEntity
+      summary: ''
+      parameters:
+        - name: entity
+          required: true
+          in: path
+          schema:
+            $ref: '#/components/schemas/EntityName'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /v1/generic/{entity}/{id}:
+    get:
+      operationId: getEntity
+      summary: ''
+      parameters:
+        - name: entity
+          required: true
+          in: path
+          schema:
+            $ref: '#/components/schemas/EntityName'
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+    patch:
+      operationId: updateEntity
+      summary: ''
+      parameters:
+        - name: entity
+          required: true
+          in: path
+          schema:
+            $ref: '#/components/schemas/EntityName'
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+    delete:
+      operationId: deleteEntity
+      summary: ''
+      parameters:
+        - name: entity
+          required: true
+          in: path
+          schema:
+            $ref: '#/components/schemas/EntityName'
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v1/generic/report/{id}:
+    delete:
+      operationId: deleteReport
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v1/report-source-documents/{id}/download:
+    get:
+      operationId: downloadReport
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: download
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v1/report/{id}:
+    get:
+      operationId: getReport
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: withDocuments
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+  /v1/user/{id}/settings:
+    get:
+      operationId: getUserSettings
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSettings'
+    put:
+      operationId: setUserSettings
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: ''
+  /v1/report/{id}/generate:
+    post:
+      operationId: generateReport
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+  /v1/report/{id}/regenerate:
+    post:
+      operationId: reGenerateReport
+      summary: ''
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+info:
+  title: Api
+  description: Description
+  version: 0.0.1
+  contact: {}
+tags: []
+servers: []
+components:
+  schemas:
+    AppConfig:
+      type: object
+      properties: {}
+    EntityName:
+      type: string
+      enum:
+        - report
+        - report-template
+        - report-source
+        - report-source-documents
+        - report-topic
+    ReportTopic:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        code:
+          type: string
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportTemplate'
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - id
+        - title
+        - code
+        - createdAt
+    ReportDocument:
+      type: object
+      properties:
+        id:
+          type: number
+        reportId:
+          type: number
+        name:
+          type: string
+        content:
+          type: string
+        metadata:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        report:
+          $ref: '#/components/schemas/Report'
+      required:
+        - id
+        - reportId
+        - name
+        - content
+        - createdAt
+    Report:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        templateId:
+          type: number
+        template:
+          $ref: '#/components/schemas/ReportTemplate'
+        createdAt:
+          format: date-time
+          type: string
+        parameters:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportDocument'
+      required:
+        - id
+        - title
+        - templateId
+        - createdAt
+    ReportTemplate:
+      type: object
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        topicId:
+          type: number
+        topic:
+          $ref: '#/components/schemas/ReportTopic'
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
+        createdAt:
+          format: date-time
+          type: string
+        parameters:
+          type: string
+      required:
+        - id
+        - title
+        - topicId
+        - createdAt
+    UserSettings:
+      type: object
+      properties:
+        id:
+          type: number
+        key:
+          type: string
+        value:
+          type: string
+      required:
+        - id
+        - key
+        - value

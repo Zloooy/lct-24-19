@@ -11,6 +11,7 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
+import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { DataSource, EntityManager, ILike } from 'typeorm';
 import { dto } from './dto';
 import { samples } from './samples';
@@ -26,15 +27,22 @@ import {
 
 type EntityClass = (typeof entities)[EntityName];
 
-const entities = {
+// type EntityName = keyof typeof entities;
+enum EntityName {
+  report = 'report',
+  reportTemplate = 'report-template',
+  reportSource = 'report-source',
+  reportSourceDocuments = 'report-source-documents',
+  reportTopic = 'report-topic',
+}
+
+const entities: { [key in EntityName]: any } = {
   report: Report,
   'report-template': ReportTemplate,
   'report-source': ReportSource,
   'report-source-documents': ReportSourceDocument,
   'report-topic': ReportTopic,
 };
-
-type EntityName = keyof typeof entities;
 
 const entitySearchFields = {
   report: ['title'],
@@ -52,6 +60,7 @@ export class GenericController {
     private readonly dataSource: DataSource,
   ) {}
 
+  @ApiOperation({ operationId: 'loadSamples' })
   @Post('load-samples')
   async loadSampleData() {
     for (const entityName of Object.keys(samples) as EntityName[]) {
@@ -63,6 +72,7 @@ export class GenericController {
     return 'OK';
   }
 
+  @ApiOperation({ operationId: 'clearSamples' })
   @Post('clear')
   async clearData() {
     if (process.env.NODE_ENV === 'development') {
@@ -74,6 +84,8 @@ export class GenericController {
     }
   }
 
+  @ApiOperation({ operationId: 'getEntities' })
+  @ApiParam({ name: 'entity', enum: EntityName, enumName: 'EntityName' })
   @Get(':entity')
   async findAll(
     @Res({ passthrough: true }) res: Response,
@@ -126,7 +138,9 @@ export class GenericController {
     return items;
   }
 
+  @ApiOperation({ operationId: 'getEntity' })
   @Get(':entity/:id')
+  @ApiParam({ name: 'entity', enum: EntityName, enumName: 'EntityName' })
   async findOne(
     @Param('entity') entityName: EntityName,
     @Param('id') id: string,
@@ -135,6 +149,8 @@ export class GenericController {
     return this.entityManager.findOneBy(entityClass, { id: +id });
   }
 
+  @ApiOperation({ operationId: 'createEntity' })
+  @ApiParam({ name: 'entity', enum: EntityName, enumName: 'EntityName' })
   @Post(':entity')
   async create(@Param('entity') entityName: EntityName, @Body() data: any) {
     const entityClass = this.parseEntityClass(entityName);
@@ -144,6 +160,8 @@ export class GenericController {
     return this.entityManager.save(entityClass, data);
   }
 
+  @ApiOperation({ operationId: 'updateEntity' })
+  @ApiParam({ name: 'entity', enum: EntityName, enumName: 'EntityName' })
   @Patch(':entity/:id')
   update(
     @Param('entity') entityName: EntityName,
@@ -154,12 +172,15 @@ export class GenericController {
     return this.entityManager.update(entityClass, +id, data);
   }
 
+  @ApiOperation({ operationId: 'deleteReport' })
   @Delete('report/:id') // special handling
   async removeReport(@Param('id') id: string) {
     await this.reportService.remove(+id);
     return {};
   }
 
+  @ApiOperation({ operationId: 'deleteEntity' })
+  @ApiParam({ name: 'entity', enum: EntityName, enumName: 'EntityName' })
   @Delete(':entity/:id')
   async remove(
     @Param('entity') entityName: EntityName,

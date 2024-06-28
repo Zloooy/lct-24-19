@@ -11,7 +11,7 @@ os.environ["USER_AGENT"] = (
 
 from fastapi import FastAPI, HTTPException
 
-from dto import PromptExecutor, PromptGenerator, PromptReExecutor, ReResearchRequest, ResearchRequest
+from dto import PromptExecutor, PromptGenerator, PromptReExecutor, ReResearchRequest, ResearchRequest, ReportTopicEnum, PromptGeneratorResult
 
 import prompt_re_executors.dummy
 import prompt_re_executors.gptr
@@ -25,7 +25,10 @@ import prompt_generators.competitors_review
 import prompt_generators.custom
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Report generation service",
+    description="Api for generating a report on a specific topic"
+)
 
 
 @app.get("/")
@@ -33,7 +36,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/research")
+@app.post("/research", operation_id="research", description="Initially generate report", response_model=PromptGeneratorResult)
 def research(request: ResearchRequest):
     # Choose prompt executor
     executor: PromptExecutor
@@ -43,29 +46,21 @@ def research(request: ResearchRequest):
         executor = prompt_executors.gptr.execute_prompt
         # raise HTTPException(status_code=400, detail="Can not choose prompt executor")
 
-    # Choose prompt generator
-    prompt_generator: PromptGenerator
-
-    if request.reportTopic == "CUSTOM":
-        prompt_generator = prompt_generators.custom.generate_prompt
-    elif request.reportTopic == "INNOVATION_NEWS":
-        prompt_generator = prompt_generators.innovation_news.generate_prompt
-    elif request.reportTopic == "COMPETITOR_REVIEW":
-        prompt_generator = prompt_generators.competitor_review.generate_prompt
-    elif request.reportTopic == "COMPETITORS_REVIEW":
-        prompt_generator = prompt_generators.competitors_review.generate_prompt
-    elif request.reportTopic == "MARKET_ANALYSIS":
-        prompt_generator = prompt_generators.market_analysis.generate_prompt
-    elif request.reportTopic == "PRODUCT_COMPARISON":
-        prompt_generator = prompt_generators.product_compare.generate_prompt
-    else:
+    report_topic_generator_map: dict[ReportTopicEnum, PromptGenerator] = {
+        ReportTopicEnum.CUSTOM: prompt_generators.custom.generate_prompt,
+        ReportTopicEnum.INNOVATION_NEWS: prompt_generators.innovation_news.generate_prompt,
+        ReportTopicEnum.COMPETITOR_REVIEW: prompt_generators.competitor_review.generate_prompt,
+        ReportTopicEnum.COMPETITORS_REVIEW: prompt_generators.competitors_review.generate_prompt,
+        ReportTopicEnum.MARKET_ANALYSIS: prompt_generators.market_analysis.generate_prompt,
+        ReportTopicEnum.PRODUCT_COMPARISON: prompt_generators.product_compare.generate_prompt
+    }
+    if request.reportTopic not in report_topic_generator_map:
         raise HTTPException(status_code=400, detail="Can not choose prompt generator")
-
     # Execute prompt
-    return asyncio.run(executor(prompt_generator, request))
+    return asyncio.run(executor(report_topic_generator_map[request.reportTopic], request))
 
 
-@app.post("/re-research")
+@app.post("/re-research", operation_id="reResearch", description="Generate modified report based on one taken from /research", response_model=PromptGeneratorResult)
 def re_research(request: ReResearchRequest):
     # Choose executor
     executor: PromptReExecutor
